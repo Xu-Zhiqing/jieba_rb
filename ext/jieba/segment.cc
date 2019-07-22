@@ -7,11 +7,21 @@
 static rb_encoding* u8_enc;
 
 struct SegWrapper{
-    CppJieba::ISegment * segp;
+    CppJieba::MixSegment *mixp;
+    CppJieba::HMMSegment *hmmp;
+    CppJieba::MPSegment *mpsp;
+    SegWrapper(): mixp(nullptr), hmmp(nullptr), mpsp(nullptr) {}
 };
+
 static void seg_free(void *p){
-    delete ((SegWrapper*) p) -> segp;
-    delete (SegWrapper*)p;
+    auto seg = reinterpret_cast<SegWrapper *>(p);
+    if (seg->mixp)
+        delete seg->mixp;
+    else if (seg->hmmp)
+        delete seg->hmmp;
+    else
+        delete seg->mpsp;
+    delete seg;
 }
 
 static VALUE allocate(VALUE klass)
@@ -40,15 +50,15 @@ static void seg_init(VALUE self,
     ID type = SYM2ID(type_rb_sym);
     if ( type == rb_intern("mix") )
     {
-        seg_wrapper->segp = new CppJieba::MixSegment(jieba_dict, hmm_dict, user_dict);
+        seg_wrapper->mixp = new CppJieba::MixSegment(jieba_dict, hmm_dict, user_dict);
     }
     else if ( type == rb_intern("hmm") )
     {
-        seg_wrapper->segp = new CppJieba::HMMSegment(hmm_dict);
+        seg_wrapper->hmmp = new CppJieba::HMMSegment(hmm_dict);
     }
     else if ( type == rb_intern("mp"))
     {
-        seg_wrapper->segp = new CppJieba::MPSegment(jieba_dict);
+        seg_wrapper->mpsp = new CppJieba::MPSegment(jieba_dict);
     }
 }
 
@@ -61,7 +71,16 @@ static VALUE seg_cut(VALUE self, VALUE text_rbs)
     Data_Get_Struct(self, SegWrapper, seg_wrapper);
 
     std::vector<std::string> words;
-    seg_wrapper->segp->cut(text, words);
+
+    if (seg_wrapper->mixp) {
+        seg_wrapper->mixp->cut(text, words);
+    }
+    else if (seg_wrapper->hmmp) {
+        seg_wrapper->hmmp->cut(text, words);
+    }
+    else {
+        seg_wrapper->mpsp->cut(text, words);
+    }
 
     volatile VALUE arr = rb_ary_new();
     for (std::vector<std::string>::const_iterator j = words.begin(); j != words.end(); j++)
