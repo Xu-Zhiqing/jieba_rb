@@ -5,7 +5,7 @@
 static rb_encoding* u8_enc;
 
 struct Keyword{
-    CppJieba::KeywordExtractor * p;
+    cppjieba::KeywordExtractor * p;
 };
 
 static void keyword_free(void *p){
@@ -45,7 +45,7 @@ static void init(VALUE self,
     ID mode = SYM2ID(mode_rb_sym);
     if ( mode == rb_intern("tf_idf") )
     {
-        keyword->p = new CppJieba::KeywordExtractor(jieba_dict, hmm_dict, idf, stop_words, user_dict);
+        keyword->p = new cppjieba::KeywordExtractor(jieba_dict, hmm_dict, idf, stop_words, user_dict);
     }
 }
 
@@ -62,25 +62,19 @@ static VALUE extract(VALUE self, VALUE text_rbs, VALUE topN)
 
     std::vector<std::pair<std::string, double> > top_words;
 
-    if (keyword->p->extract(text, top_words, top_n))
+    keyword->p->Extract(text, top_words, top_n);
+    volatile VALUE arr = rb_ary_new();
+    for(size_t i = 0; i < top_words.size(); i++)
     {
-        volatile VALUE arr = rb_ary_new();
-        for(size_t i = 0; i < top_words.size(); i++)
-        {
-            volatile VALUE inner_arr = rb_ary_new();
-            std::string & word = top_words[i].first;
-            rb_ary_push(inner_arr, rb_enc_str_new(word.c_str(), word.length(), u8_enc));
-            rb_ary_push(inner_arr, rb_float_new(top_words[i].second));
+        volatile VALUE inner_arr = rb_ary_new();
+        std::string & word = top_words[i].first;
+        rb_ary_push(inner_arr, rb_enc_str_new(word.c_str(), word.length(), u8_enc));
+        rb_ary_push(inner_arr, rb_float_new(top_words[i].second));
 
-            rb_ary_push(arr, inner_arr);
+        rb_ary_push(arr, inner_arr);
 
-        }
-        return arr;
     }
-    else
-    {
-        return Qfalse;
-    }
+    return arr;
 }
 
 #define DEF(k,n,f,c) rb_define_method(k,n,RUBY_METHOD_FUNC(f),c)
