@@ -1,17 +1,16 @@
 #include "tagging.h"
 #include <ruby/encoding.h>
 #include <PosTagger.hpp>
-#include <MixSegment.hpp>
 
 static rb_encoding* u8_enc;
 
 struct Tagging{
-    cppjieba::MixSegment *p;
+    cppjieba::PosTagger * p;
 };
 
 static void tagger_free(void *p){
-    delete reinterpret_cast<Tagging *>(p)->p;
-    delete reinterpret_cast<Tagging *>(p);
+    delete ((Tagging*) p) -> p;
+    delete (Tagging*)p;
 }
 
 static VALUE alloc(VALUE klass)
@@ -36,7 +35,7 @@ static void init(VALUE self,
     std::string hmm_dict = StringValueCStr(hmm_dict_rbs);
     std::string user_dict = StringValueCStr(user_dict_rbs);
 
-    tagging->p = new cppjieba::MixSegment(jieba_dict, hmm_dict, user_dict);
+    tagging->p = new cppjieba::PosTagger(jieba_dict, hmm_dict, user_dict);
 }
 
 static VALUE tag(VALUE self, VALUE text_rbs)
