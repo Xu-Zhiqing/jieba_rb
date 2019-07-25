@@ -14,4 +14,9 @@ class JiebaTest < Minitest::Test
     assert_equal [{"我"=>"r"}, {"是"=>"v"}, {"蓝翔"=>"nz"}, {"技工"=>"n"}, {"拖拉机"=>"n"}, {"学院"=>"n"}, {"手扶拖拉机"=>"n"}, {"专业"=>"n"}, {"的"=>"uj"}, {"。"=>"x"}], pairs
   end
 
+  def test_tagging_with_real_user_dict
+    tagging = JiebaRb::Tagging.new user_dict: "#{File.dirname(__FILE__)}/user.dict.utf8"
+    pairs = tagging.tag "年假"
+    assert_equal [{"年假"=>"n"}], pairs
+  end
 end
