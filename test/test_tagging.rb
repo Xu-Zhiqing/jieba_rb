@@ -16,7 +16,7 @@ class JiebaTest < Minitest::Test
 
   def test_tagging_with_real_user_dict
     tagging = JiebaRb::Tagging.new user_dict: "#{File.dirname(__FILE__)}/user.dict.utf8"
-    pairs = tagging.tag "年假"
-    assert_equal [{"年假"=>"n"}], pairs
+    pairs = tagging.tag "分包合同"
+    assert_equal [{"分包合同"=>"x"}], pairs
   end
 end
