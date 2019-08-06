@@ -4,13 +4,13 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'jieba_rb/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "jieba_rb"
+  spec.name          = "jieba-rb"
   spec.version       = JiebaRb::VERSION
   spec.authors       = ["Chris Li"]
   spec.email         = ["liqi8822@gmail.com"]
   spec.summary       = "cppjieba binding for ruby"
   spec.description   = "cppjieba binding for ruby"
-  spec.homepage = "https://github.com/altkatz/jieba_rb"
+  spec.homepage = "https://github.com/Xu-Zhiqing/jieba_rb"
   spec.required_ruby_version = ">=1.9.2"
   spec.license       = "MIT"
   spec.extensions = ["ext/jieba/extconf.rb"]
@@ -28,7 +28,7 @@ Gem::Specification.new do |spec|
       # Make the submodule path relative
       submodule_path = submodule_path.gsub(/#{relative_path}/i, '')
       # issue git ls-files in submodule's directory
-      submodule_files = `git ls-files`.split($\)
+      submodule_files = `git ls-files`.split($\).reject { |i| i.start_with? 'test/' }
 
       # prepend the submodule path to create relative file paths
       submodule_files_paths = submodule_files.map do |filename|
@@ -42,7 +42,7 @@ Gem::Specification.new do |spec|
 
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
-  spec.require_paths = ["lib"]
+  spec.require_paths = ['lib']
 
   spec.add_development_dependency "bundler"
   spec.add_development_dependency "rake"
