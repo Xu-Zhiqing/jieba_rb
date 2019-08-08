@@ -1,3 +1,3 @@
 module JiebaRb
-  VERSION = "4.8.1"
+  VERSION = "5.0.0"
 end
